@@ -2,10 +2,12 @@ from typing import Any, Callable, List, Optional
 from .crypto import BDACrypto
 import base64
 import json
+import time
 
 class ArkoseBrowserFingerprint(object):
     def __init__(self, encoded_fingerprint: str, user_agent: str, timestamp: int = None):
-        self._timestamp = str(int(timestamp - (timestamp % 21600))) if not timestamp else timestamp
+        now = time.time()
+        self._timestamp = str(int(now - (now % 21600))) if not timestamp else timestamp
         self._key = user_agent + str(self._timestamp)
 
         self.crypto = BDACrypto(self._key)
