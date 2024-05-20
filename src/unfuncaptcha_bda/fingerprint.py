@@ -5,9 +5,8 @@ import json
 import time
 
 class ArkoseBrowserFingerprint(object):
-    def __init__(self, encoded_fingerprint: str, user_agent: str, timestamp: int = None):
-        now = time.time()
-        self._timestamp = str(int(now - (now % 21600))) if not timestamp else timestamp
+    def __init__(self, encoded_fingerprint: str, user_agent: str, timestamp: int = int(time.time())):
+        self._timestamp = str(int(timestamp - (timestamp % 21600)))
         self._key = user_agent + str(self._timestamp)
 
         self.crypto = BDACrypto(self._key)
@@ -25,14 +24,14 @@ class ArkoseBrowserFingerprint(object):
         return repacked_bda if not encode_base64 else base64.b64encode(repacked_bda.encode()).decode()
 
 
-    def core_key_operation(self, 
-        key: str, 
+    def _core_key_operation(self, 
+        key: str,
         operation: Callable, 
-        value: Any, 
+        value: Any = None,
         container: Optional[List[dict[str, Any]]] = None, 
         key_required_for_operation: Optional[bool] = True
     ) -> Any:
-        container = self.fingerprint if container is None else container
+        container = container or self.fingerprint
         items = list(filter(lambda item: item['key'] == key, container))
         
         if not items and key_required_for_operation:
@@ -42,15 +41,30 @@ class ArkoseBrowserFingerprint(object):
 
 
     def fetch_key(self, key: str, container: Optional[List[dict[str, Any]]] = None) -> Any:
-        return self.core_key_operation(key, lambda item, _, __: item['value'], None, container)
+        return self._core_key_operation(
+            key,
+            operation = lambda item, _, __: item['value'], 
+            container = container
+        )
 
 
     def insert_key(self, key: str, value: Any, container: Optional[List[dict[str, Any]]] = None) -> Any:
-        return self.core_key_operation(key, lambda _, value, container: container.append({'key': key, 'value': value}) or value, value, container, False)
+        return self._core_key_operation(
+            key, 
+            operation = lambda _, value, container: container.append({'key': key, 'value': value}) or value, 
+            value = value, 
+            container = container, 
+            key_required_for_operation = False
+        )
 
 
     def edit_key(self, key: str, value: Any, container: Optional[List[dict[str, Any]]] = None) -> Any:
-        return self.core_key_operation(key, lambda item, value, _: item.__setitem__('value', value) or value, value, container)
+        return self._core_key_operation(
+            key, 
+            operation = lambda item, value, _: item.__setitem__('value', value) or value, 
+            value = value, 
+            container = container
+        )
 
 
     def fetch_enhanced_fp_key(self, enhanced_fp_key: str) -> Any:
