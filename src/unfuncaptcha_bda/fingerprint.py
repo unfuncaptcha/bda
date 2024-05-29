@@ -19,6 +19,7 @@ class ArkoseBrowserFingerprint(object):
         self._timestamp = str(int(timestamp - (timestamp % 21600)))
         self._key = self._user_agent + str(self._timestamp)
         self.crypto = BDACrypto(self._key)
+        return self._timestamp
 
     
     def repackage(self, encode_base64: bool = True) -> str:
