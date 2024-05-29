@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "unfuncaptcha_bda"
-version = "0.0.5"
+version = "0.0.6"
 authors = [{ name = "bc", email = "no@dont.email.me" }]
 description = "View, edit, and repackage Arkose Labs Funcaptcha fingerprints"
 readme = "README.md"
