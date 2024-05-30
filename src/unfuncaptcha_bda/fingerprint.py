@@ -15,10 +15,11 @@ class ArkoseBrowserFingerprint(object):
         self.fingerprint: list[dict[str, Any]] = json.loads(self.crypto.decrypt(self._raw_fingeprint).decode())
 
 
-    def new_timestamp(self, timestamp: int = int(time.time())) -> int:
+    def update_timestamp(self, timestamp: int = int(time.time())) -> int:
         self._timestamp = int(timestamp - (timestamp % 21600))
         self._key = self._user_agent + str(self._timestamp)
         self.crypto = BDACrypto(self._key)
+        
         return self._timestamp
 
     
